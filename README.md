@@ -7,19 +7,36 @@ dvbv5-zap -a <adapter#> -c dvbv5_channels_isdbs.conf -r -P <channel>
 dvbv5-zap -a <adapter#> -c dvbv5_channels_isdbt.conf -r -P <channel>
 ```
 
-## Files
-| File | Delivery system | Target |
+## Files per reception route
+`dvbv5_channels_<route>.conf` holds the channels of one reception route.
+The route names are those of Mirakurun (`TER`, `SAT`, `SKY`, `CATV`, `FTTH`).
+
+| File | Route | Channels |
 | --- | --- | --- |
-| `dvbv5_channels_isdbs.conf` | `ISDBS` | BS / 110CS |
-| `dvbv5_channels_isdbt.conf` | `ISDBT` | Terrestrial (`13`-`62`) and CATV pass-through (`1`-`12`, `C13`-`C63`) |
-| `dvbv5_channels_dvbc-a.conf` | `DVBC/ANNEX_A` | CATV trans-modulation (J.83 Annex C, 6 MHz raster, 5.274 Msym/s), for tuners that only offer Annex A |
-| `dvbv5_channels_dvbc-c.conf` | `DVBC/ANNEX_C` | Same channels as `dvbc-a`, for tuners that support Annex C |
-| `dvbv5_channels_dvbc-b_sky-hikari.conf` | `DVBC/ANNEX_B` | SKY PerfecTV! Premium Service Hikari (256QAM, 5.6 Msym/s) |
-| `dvbv5_channels_dvbs2_sky.conf` | `DVBS2` | SKY PerfecTV! Premium Service (JCSAT-3A 128E / JCSAT-4B 124E) |
+| `dvbv5_channels_ter.conf` | Terrestrial antenna | `1`-`12`, `13`-`62`, `C13`-`C63` (ISDB-T) |
+| `dvbv5_channels_sat.conf` | BS / 110CS antenna | `BSxx_y`, `CSx` (ISDB-S), BS 4K / 8K (ISDB-S3) |
+| `dvbv5_channels_sky.conf` | 124 / 128 CS antenna | `JCSAT3A-TPxx`, `JCSAT4B-TPxx` (DVB-S2) |
+| `dvbv5_channels_catv.conf` | Cable TV (trans-modulation) | `1`-`12`, `C13`-`C63`, `13`-`62` (J.83 Annex C, tuned as `DVBC/ANNEX_A`) |
+| `dvbv5_channels_ftth.conf` | Optical TV | `13`-`62`, `BSxx_y`, `CSx` (pass-through), SKY PerfecTV! Premium Service Hikari (J.83 Annex B) |
 
-`sky` corresponds to `type: SKY` of Mirakurun.
+`dvbv5_channels_isdbs.conf` and `dvbv5_channels_isdbt.conf` are kept as they
+were for existing setups. New entries are only added to the files above.
 
-### Notes on `dvbv5_channels_dvbs2_sky.conf`
+### `dvbv5_channels_sat.conf`
+- `BSxx_y` is transponder `xx` and relative stream number `y`, like recpt1.
+  Slots that are no longer on air are not listed.
+- BS 4K / 8K entries (`BS07_*`, `BS11_*`, `BS17_*`, `BS14_0`) carry an ISDB-S3
+  stream ID (`0xbXXX`) with `DELIVERY_SYSTEM = ISDBS`. The Linux DVB API has no
+  delivery system for ISDB-S3, so this only works with drivers that follow
+  this convention, such as
+  [tbs6812_drv](https://github.com/otya128/tbs6812_drv) (TBS6812 / PT4K).
+  The output is a TLV/MMT stream, not MPEG-TS.
+- `BS14_0` (8K) is left-hand circular polarized and needs an antenna and
+  cabling that support it.
+- The second stream of BS11 is not listed, because its stream ID could not be
+  confirmed.
+
+### `dvbv5_channels_sky.conf`
 This file does **not** work with stock `dvbv5-zap`. libdvbv5 has no LNBf
 definition for this service and does not drive its LNB control signals:
 
@@ -27,11 +44,10 @@ definition for this service and does not drive its LNB control signals:
 - Polarization: selected by LNB voltage
 - Satellite: selected by 22 kHz tone (off = JCSAT-3A, on = JCSAT-4B)
 
-It is provided as a transponder table for tools that handle the LNB
-themselves. All transponders are listed with the DVB-S2 parameters of the
-service (8PSK, 23.303 Msym/s, FEC 3/5); not every transponder is
-necessarily on air.
+All transponders are listed with the DVB-S2 parameters of the service
+(8PSK, 23.303 Msym/s, FEC 3/5); not every transponder is necessarily on air.
 
-Tools such as [szap-s2j](https://github.com/kanreisa/szap-s2j) can drive
-this LNB, but they use their own channel file format and cannot read this
-file directly.
+### `dvbv5_channels_ftth.conf`
+- The left-hand circular polarized `BS14_0` is not listed.
+- The SKY PerfecTV! Premium Service Hikari entries (256QAM, 5.6 Msym/s) are
+  named after their frequency in kHz (`73750`-`769250`).
