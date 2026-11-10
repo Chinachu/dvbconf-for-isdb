@@ -23,8 +23,8 @@ The route names are those of Mirakurun (`TER`, `SAT`, `SKY`, `CATV`, `FTTH`).
 were for existing setups. New entries are only added to the files above.
 
 ### `dvbv5_channels_sat.conf`
-- `BSxx_y` is transponder `xx` and relative stream number `y`, like recpt1.
-  Slots that are no longer on air are not listed.
+- `BSxx_y` and `CSx` are the channel names of recpt1, the same as in
+  `dvbv5_channels_isdbs.conf`. Slots that are no longer on air are not listed.
 - BS 4K / 8K entries (`BS07_*`, `BS11_*`, `BS17_*`, `BS14_0`) carry an ISDB-S3
   stream ID (`0xbXXX`) with `DELIVERY_SYSTEM = ISDBS`. The Linux DVB API has no
   delivery system for ISDB-S3, so this only works with drivers that follow
