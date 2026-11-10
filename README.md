@@ -22,6 +22,18 @@ The route names are those of Mirakurun (`TER`, `SAT`, `SKY`, `CATV`, `FTTH`).
 `dvbv5_channels_isdbs.conf` and `dvbv5_channels_isdbt.conf` are kept as they
 were for existing setups. New entries are only added to the files above.
 
+### Channels with a shifted frequency
+Some cable and optical systems carry a few channels on a shifted frequency.
+These are listed at the end of each file under a separate name, so that the
+default channel names keep their frequency.
+
+- `dvbv5_channels_ter.conf`, `dvbv5_channels_catv.conf`:
+  `4-` - `7-` and `C22-` are 2 MHz lower than `4` - `7` and `C22`.
+  `C24+` - `C27+` are 2 MHz higher than `C24` - `C27`.
+- `dvbv5_channels_ftth.conf`: `159250`, `165750` (1 MHz higher than `158250`,
+  `164750`) and `259750`, `266250`, `272750` (4 MHz higher than `255750`,
+  `262250`, `268750`).
+
 ### `dvbv5_channels_sat.conf`
 - `BSxx_y` and `CSx` are the channel names of recpt1, the same as in
   `dvbv5_channels_isdbs.conf`. Slots that are no longer on air are not listed.
